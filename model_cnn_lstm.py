@@ -12,6 +12,8 @@ from keras.layers.convolutional import Conv1D
 from keras.layers.convolutional import MaxPooling1D
 from keras.utils import to_categorical
 
+import time
+
 
 
 # load a single file as a numpy array
@@ -46,35 +48,90 @@ def load_dataset_group(group, prefix=''):
     # load all 9 files as a single array
     filenames = list()
     # total acceleration
-    filenames += ['B1_X1_'+group+'.csv', 'B1_X2_'+group+'.csv']
+    filenames += ['X_1_w_100_s_25.csv', 'X_2_w_100_s_25.csv']
 
     # load input data
     X = load_group(filenames, filepath)
     # load class output
-    y = load_file(prefix + group + '/B1_Y_'+group+'.csv')
+    y = load_file(filepath + 'y_w_100_s_25.csv')
     print("X : ", X.shape)
     print("y : ", y.shape)
-    exit()
     return X, y
 
 # load the dataset, returns train and test X and y elements
 def load_dataset(prefix=''):
     # load all train
-    trainX, trainy = load_dataset_group('train', prefix + 'DataSetForPython/')
+    trainX, trainy = load_dataset_group('Train', prefix + 'data/')
     # load all test
-    testX, testy = load_dataset_group('test', prefix + 'DataSetPython/')
+    testX, testy = load_dataset_group('Test', prefix + 'data/')
+
+
+    testy = testy.astype(int)
+
+    print("trainy",trainy)
+    print("testy",testy)
     # zero-offset class values
     # trainy = trainy - 1
     # testy = testy - 1
     # # one hot encode y
-    # trainy = to_categorical(trainy)
-    # testy = to_categorical(testy)
-    # return trainX, trainy, testX, testy
-    return 0,0,0,0
+    trainy = to_categorical(trainy)
+    testy = to_categorical(testy)
+    print("trainy",trainy)
+    print("testy",testy)
 
-def run_experiment(repeats=10):
+    return trainX, trainy, testX, testy
+
+# fit and evaluate a model
+def evaluate_model(trainX, trainy, testX, testy):
+    # define model
+    verbose, epochs, batch_size = 1, 10, 64
+    n_features, n_outputs = trainX.shape[2], trainy.shape[1]
+    # reshape data into time steps of sub-sequences
+    n_steps, n_length = 4, 25
+    trainX = trainX.reshape((trainX.shape[0], n_steps, n_length, n_features))
+    testX = testX.reshape((testX.shape[0], n_steps, n_length, n_features))
+    # define model
+    model = Sequential()
+    model.add(TimeDistributed(Conv1D(filters=64, kernel_size=3, activation='relu'),
+    input_shape=(None,n_length,n_features)))
+    model.add(TimeDistributed(Conv1D(filters=64, kernel_size=3, activation='relu')))
+    model.add(TimeDistributed(Dropout(0.5)))
+    model.add(TimeDistributed(MaxPooling1D(pool_size=2)))
+    model.add(TimeDistributed(Flatten()))
+    model.add(LSTM(100))
+    model.add(Dropout(0.5))
+    model.add(Dense(100, activation='relu'))
+    model.add(Dense(n_outputs, activation='softmax'))
+    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    
+    model.summary()
+    # fit network
+    model.fit(trainX, trainy, epochs=epochs, batch_size=batch_size, verbose=verbose)
+    # evaluate model
+    _, accuracy = model.evaluate(testX, testy, batch_size=batch_size, verbose=0)
+    return accuracy
+
+def summarize_results(scores):
+    print(scores)
+    m, s = mean(scores), std(scores)
+    print('Accuracy: %.3f%% (+/-%.3f)' % (m, s))
+
+
+def run_experiment(repeats=1):
+    start_time = time.time()
     # load data
     trainX, trainy, testX, testy = load_dataset()
+        # repeat experiment
+    scores = list()
+    for r in range(repeats):
+        score = evaluate_model(trainX, trainy, testX, testy)
+        score = score * 100.0
+        print('>#%d: %.3f' % (r+1, score))
+        scores.append(score)
+    # summarize results
+    summarize_results(scores)
+
+    print("Overall process time : ",(start_time- time.time()))
 
 
 if __name__ == "__main__":

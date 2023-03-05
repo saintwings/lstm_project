@@ -61,7 +61,6 @@ def load_dataset_group(group, prefix=''):
 
     print("X : ", X.shape)
     print("y : ", y.shape)
-    exit()
     return X, y
 
 # load the dataset, returns train and test X and y elements
@@ -70,12 +69,22 @@ def load_dataset(prefix=''):
     trainX, trainy = load_dataset_group('train', prefix + 'HARDataset/')
     # load all test
     testX, testy = load_dataset_group('test', prefix + 'HARDataset/')
+
+    
+    print("trainy",trainy)
+    print("testy",testy)
     # zero-offset class values
     trainy = trainy - 1
     testy = testy - 1
+    print("trainy",trainy)
+    print("testy",testy)
     # one hot encode y
     trainy = to_categorical(trainy)
     testy = to_categorical(testy)
+    print("trainy",trainy)
+    print("testy",testy)
+
+    exit()
     return trainX, trainy, testX, testy
 
 # fit and evaluate a model
