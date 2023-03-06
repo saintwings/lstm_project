@@ -2,19 +2,28 @@ import csv
 from pandas import read_csv
 import numpy as np
 
-def load_data_from_raw(prefix,path_X, path_y):
+def generate_data_from_raw(prefix_path,group,prefix_name,path_X, path_y,window,stride):
     
-    dataframe_X = read_csv(prefix + path_X, header=None)
+    print("read : ",prefix_path + group + prefix_name + path_X)
+    dataframe_X = read_csv(prefix_path + group + prefix_name + path_X, header=None)
+    print("read : ",prefix_path + group + prefix_name + path_y)
+    dataframe_y = read_csv(prefix_path + group + prefix_name + path_y, header=None)
 
-
-
-    dataframe_y = read_csv(prefix + path_y, header=None)
-
-    # print(len(dataframe_X.values[0]))
-    # print(len(dataframe_X.values[1]))
     print(len(dataframe_y.values[0]))
+    X_1,X_2,y = split_sequence_2(dataframe_X.values[0],dataframe_X.values[1],dataframe_y.values[0],window,stride)
 
-    split_sequence_2(dataframe_X.values[0],dataframe_X.values[1],dataframe_y.values[0],100,25)
+        
+    with open(prefix_path + group + prefix_name + '_X_1_w_'+ str(window) +'_s_'+ str(stride) +'.csv', 'w') as f:
+        write = csv.writer(f)
+        write.writerows(X_1)
+    
+    with open(prefix_path + group + prefix_name + '_X_2_w_'+ str(window) +'_s_'+ str(stride) +'.csv', 'w') as f:
+        write = csv.writer(f)
+        write.writerows(X_2)
+    
+    with open(prefix_path + group + prefix_name + '_y_w_'+ str(window) +'_s_'+ str(stride) +'.csv', 'w') as f:
+        write = csv.writer(f,delimiter="\n")
+        write.writerow(y)
     
 
 def split_sequence_2(data_X_1,data_X_2, data_y,windowLength, stride):
@@ -38,17 +47,8 @@ def split_sequence_2(data_X_1,data_X_2, data_y,windowLength, stride):
         X_2.append(X_2_s)
         y.append(y_s)
     
-    with open(prefix + 'X_1_w_'+ str(windowLength) +'_s_'+ str(stride) +'.csv', 'w') as f:
-        write = csv.writer(f)
-        write.writerows(X_1)
-    
-    with open(prefix + 'X_2_w_'+ str(windowLength) +'_s_'+ str(stride) +'.csv', 'w') as f:
-        write = csv.writer(f)
-        write.writerows(X_2)
-    
-    with open(prefix + 'y_w_'+ str(windowLength) +'_s_'+ str(stride) +'.csv', 'w') as f:
-        write = csv.writer(f,delimiter="\n")
-        write.writerow(y)
+    return X_1,X_2,y
+
 
 
 def split_sequence(data_X_1,data_X_2, data_y,windowLength, stride):
@@ -262,12 +262,23 @@ def rewrite_file_1():
 
 
 if __name__ == "__main__":
+
+    window = 64#128
+    stride = 32#32
+    #generate_data_from_raw("data/","Train/","B11","XTrain_Full.csv", "YTrain_Full.csv",window,stride)
+    #generate_data_from_raw("data/","Train/","B12","XTrain_Full.csv", "YTrain_Full.csv",window,stride)
+    #generate_data_from_raw("data/","Test/","B13","XTest_Full.csv", "YTest_Full.csv",window,stride)
+    #generate_data_from_raw("data/","Test/","B14","XTest_Full.csv", "YTest_Full.csv",window,stride)
+    #generate_data_from_raw("data/","Test/","B15","XTest_Full.csv", "YTest_Full.csv",window,stride)
+    generate_data_from_raw("data/","Test/","B16","XTest_Full.csv", "YTest_Full.csv",window,stride)
+    generate_data_from_raw("data/","Test/","B17","XTest_Full.csv", "YTest_Full.csv",window,stride)
+
     ## 0
     #prefix = "data/"
     #load_data_from_raw(prefix, 'B11XTrain_Full.csv','B11YTrain_Full.csv')
 
-    prefix = "data/Test/"
-    load_data_from_raw(prefix, 'B13XTest.csv','B13YTest.csv')
+    # prefix = "data/Test/"
+    # load_data_from_raw(prefix, 'B13XTest.csv','B13YTest.csv')
 
     #check_data()
     #replace_value(2,0)

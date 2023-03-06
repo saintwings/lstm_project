@@ -84,13 +84,12 @@ def load_dataset(prefix=''):
     print("trainy",trainy)
     print("testy",testy)
 
-    exit()
     return trainX, trainy, testX, testy
 
 # fit and evaluate a model
 def evaluate_model(trainX, trainy, testX, testy):
     # define model
-    verbose, epochs, batch_size = 0, 25, 64
+    verbose, epochs, batch_size = 0, 25, 128
     n_features, n_outputs = trainX.shape[2], trainy.shape[1]
     # reshape data into time steps of sub-sequences
     n_steps, n_length = 4, 32

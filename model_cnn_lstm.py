@@ -1,6 +1,11 @@
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+import tensorflow as tf
+
 from numpy import mean
 from numpy import std
 from numpy import dstack
+from numpy import concatenate
 from pandas import read_csv
 from keras.models import Sequential
 from keras.layers import Dense
@@ -11,6 +16,10 @@ from keras.layers import TimeDistributed
 from keras.layers.convolutional import Conv1D
 from keras.layers.convolutional import MaxPooling1D
 from keras.utils import to_categorical
+
+
+
+
 
 import time
 
@@ -36,80 +45,109 @@ def load_group(filenames, prefix=''):
         loaded.append(data)
     # stack group so that features are the 3rd dimension
     loaded = dstack(loaded)
-    print(type(loaded))
-    print(loaded.shape)
+    #print(type(loaded))
+    #print(loaded.shape)
     #print(loaded)
 
     return loaded
 
 # load a dataset group, such as train or test
-def load_dataset_group(group, prefix=''):
-    filepath = prefix + group + '/'
+def load_dataset_group(prefix,window,stride):
+    filepath = prefix
+    suffix = '_w_' + str(window) + '_s_' + str(stride) + '.csv'
     # load all 9 files as a single array
     filenames = list()
     # total acceleration
-    filenames += ['X_1_w_100_s_25.csv', 'X_2_w_100_s_25.csv']
+    filenames += ['_X_1' + suffix, '_X_2' + suffix]
 
     # load input data
     X = load_group(filenames, filepath)
     # load class output
-    y = load_file(filepath + 'y_w_100_s_25.csv')
-    print("X : ", X.shape)
-    print("y : ", y.shape)
+    y = load_file(filepath + '_y'  + suffix)
+    #print("X : ", X.shape)
+    #print("y : ", y.shape)
+    
     return X, y
 
 # load the dataset, returns train and test X and y elements
 def load_dataset(prefix=''):
+    window = 64#128
+    stride = 32#32
     # load all train
-    trainX, trainy = load_dataset_group('Train', prefix + 'data/')
+    train_data = "B11"
+    print("Train data: ",train_data)
+    trainX_11, trainy_11 = load_dataset_group(prefix + 'data/Train/' + train_data,window,stride)
+    print("trainX: ", trainX_11.shape, " | trainy: ", trainy_11.shape)
+
+
+    train_data = "B12"
+    print("Train data: ",)
+    trainX_12, trainy_12 = load_dataset_group(prefix + 'data/Train/' + train_data,window,stride)
+    print("trainX: ", trainX_12.shape, " | trainy: ", trainy_12.shape)
+
+    trainX = concatenate((trainX_11,trainX_12),axis=0)
+    trainy = concatenate((trainy_11,trainy_12),axis=0)
+
+    #print("trainX : ", trainX.shape)
+    #print("trainy : ", trainy.shape)
+
+
     # load all test
-    testX, testy = load_dataset_group('Test', prefix + 'data/')
-
-
+    test_data = "B17"
+    print("Test data: ",test_data)
+    testX, testy = load_dataset_group(prefix + 'data/Test/' + test_data,window,stride)
     testy = testy.astype(int)
+    print("testX: ", testX.shape, " | testy: ", testy.shape)
 
-    print("trainy",trainy)
-    print("testy",testy)
-    # zero-offset class values
-    # trainy = trainy - 1
-    # testy = testy - 1
-    # # one hot encode y
     trainy = to_categorical(trainy)
     testy = to_categorical(testy)
-    print("trainy",trainy)
-    print("testy",testy)
+    #print("trainy",trainy)
+    #print("testy",testy)
+
+
 
     return trainX, trainy, testX, testy
 
 # fit and evaluate a model
 def evaluate_model(trainX, trainy, testX, testy):
     # define model
-    verbose, epochs, batch_size = 1, 10, 64
+    verbose, epochs, batch_size = 1, 3, 128
     n_features, n_outputs = trainX.shape[2], trainy.shape[1]
     # reshape data into time steps of sub-sequences
-    n_steps, n_length = 4, 25
+    
+    n_steps, n_length = 1, 64
     trainX = trainX.reshape((trainX.shape[0], n_steps, n_length, n_features))
     testX = testX.reshape((testX.shape[0], n_steps, n_length, n_features))
+    
+    #print('trainX.shape',trainX.shape)
     # define model
     model = Sequential()
     model.add(TimeDistributed(Conv1D(filters=64, kernel_size=3, activation='relu'),
     input_shape=(None,n_length,n_features)))
-    model.add(TimeDistributed(Conv1D(filters=64, kernel_size=3, activation='relu')))
+    #model.add(TimeDistributed(Conv1D(filters=64, kernel_size=3, activation='relu')))
     model.add(TimeDistributed(Dropout(0.5)))
     model.add(TimeDistributed(MaxPooling1D(pool_size=2)))
     model.add(TimeDistributed(Flatten()))
     model.add(LSTM(100))
     model.add(Dropout(0.5))
-    model.add(Dense(100, activation='relu'))
-    model.add(Dense(n_outputs, activation='softmax'))
-    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    #model.add(Dense(100, activation='relu'))
+    model.add(Dense(n_outputs, activation='sigmoid'))
+    #model.add(Dense(n_outputs, activation='softmax'))
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    #model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
     
     model.summary()
     # fit network
+    print("Training...")
     model.fit(trainX, trainy, epochs=epochs, batch_size=batch_size, verbose=verbose)
     # evaluate model
-    _, accuracy = model.evaluate(testX, testy, batch_size=batch_size, verbose=0)
+    print("Testing...")
+    _, accuracy = model.evaluate(testX, testy, batch_size=batch_size, verbose=1)
     return accuracy
+
+
+
+
 
 def summarize_results(scores):
     print(scores)
@@ -131,7 +169,7 @@ def run_experiment(repeats=1):
     # summarize results
     summarize_results(scores)
 
-    print("Overall process time : ",(start_time- time.time()))
+    print("Overall process time : ",(time.time() - start_time))
 
 
 if __name__ == "__main__":
