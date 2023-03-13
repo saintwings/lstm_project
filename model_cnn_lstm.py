@@ -44,11 +44,16 @@ def load_group(filenames, prefix=''):
         data = load_file(prefix + name)
         loaded.append(data)
     # stack group so that features are the 3rd dimension
+    #print(loaded)
+    #print(type(loaded))
+    #print(len(loaded))
+    #print(len(loaded[0]))
     loaded = dstack(loaded)
+
     #print(type(loaded))
     #print(loaded.shape)
     #print(loaded)
-
+    #exit()
     return loaded
 
 # load a dataset group, such as train or test
@@ -90,10 +95,10 @@ def load_dataset(prefix=''):
 
     #print("trainX : ", trainX.shape)
     #print("trainy : ", trainy.shape)
-
+    #exit()
 
     # load all test
-    test_data = "B17"
+    test_data = "B14"
     print("Test data: ",test_data)
     testX, testy = load_dataset_group(prefix + 'data/Test/' + test_data,window,stride)
     testy = testy.astype(int)
@@ -140,6 +145,10 @@ def evaluate_model(trainX, trainy, testX, testy):
     # fit network
     print("Training...")
     model.fit(trainX, trainy, epochs=epochs, batch_size=batch_size, verbose=verbose)
+
+    
+
+
     # evaluate model
     print("Testing...")
     _, accuracy = model.evaluate(testX, testy, batch_size=batch_size, verbose=1)
