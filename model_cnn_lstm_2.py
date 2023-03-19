@@ -57,8 +57,9 @@ def load_data(files, group, window, stride):
     print("y ",y.shape)
 
     y_encoded = to_categorical(y)
-    print(y_encoded)
+    #print(y_encoded)
     print("y_encoded ",y_encoded.shape)
+    print("111111111sss")
     return X, y_encoded, y
 
     #exit()
@@ -69,23 +70,26 @@ def load_data(files, group, window, stride):
 
 
 
-def train_model(X_train, y_train, model_path):
+def train_model(X_train, y_train, model_path, window):
 
     verbose, epochs, batch_size = 1, 3, 128
     n_features, n_outputs = X_train.shape[2], y_train.shape[1]
 
-    n_steps, n_length = 1, 64
+    print("AAAAA")
+
+    n_steps, n_length = 1, window
     X_train = X_train.reshape((X_train.shape[0], n_steps, n_length, n_features))
 
+    print("BBBBB")
 
     model = Sequential()
-    model.add(TimeDistributed(Conv1D(filters=64, kernel_size=3, activation='relu'),
+    model.add(TimeDistributed(Conv1D(filters=32, kernel_size=3, activation='relu'),
     input_shape=(None,n_length,n_features)))
     #model.add(TimeDistributed(Conv1D(filters=64, kernel_size=3, activation='relu')))
     model.add(TimeDistributed(Dropout(0.5)))
-    model.add(TimeDistributed(MaxPooling1D(pool_size=2)))
+    model.add(TimeDistributed(MaxPooling1D(pool_size=4)))
     model.add(TimeDistributed(Flatten()))
-    model.add(LSTM(100))
+    model.add(LSTM(50))
     model.add(Dropout(0.5))
     #model.add(Dense(100, activation='relu'))
     model.add(Dense(n_outputs, activation='sigmoid'))
@@ -101,8 +105,8 @@ def train_model(X_train, y_train, model_path):
     model.save(model_path)
 
 
-def evaluate_model(X_test, y_test, model_path):
-    n_steps, n_length = 1, 64
+def evaluate_model(X_test, y_test, model_path,window):
+    n_steps, n_length = 1, window
     batch_size = 128
     n_features, n_outputs = X_test.shape[2], y_test.shape[1]
     X_test = X_test.reshape((X_test.shape[0], n_steps, n_length, n_features))
@@ -127,24 +131,16 @@ def evaluate_model(X_test, y_test, model_path):
     return class_labels
 
 
-
-
-
-if __name__ == "__main__":
-    window = 64
-    stride = 32
-
-    model_path = 'model/model1'
-
-    #prefix_train_data = ['B11','B12']
-    #X_train, y_train = load_data(prefix_train_data , 'Train', window, stride)
-    #train_model(X_train, y_train, model_path)
+def train(model_path, prefix_train_data, window, stride):
     
-    perfix_test_data = ['B15']
+    X_train, y_train, _ = load_data(prefix_train_data , 'Train', window, stride)
+    train_model(X_train, y_train, model_path, window)
+
+def test(model_path,perfix_test_data,window, stride):
     X_test, y_test, y_law = load_data(perfix_test_data , 'Test', window, stride)
 
     
-    y_predic = evaluate_model(X_test, y_test, model_path)
+    y_predic = evaluate_model(X_test, y_test, model_path, window)
 
 
     ## plot ##
@@ -155,4 +151,26 @@ if __name__ == "__main__":
     plt.plot(y_predic, 'r')
     plt.plot(list_y_law, 'b')
     plt.show()
+
+
+if __name__ == "__main__":
+    window = 32
+    stride = 8
+
+    model_path = 'model/model_' + str(window) + "_" + str(stride)
+    prefix_train_data = ['B11','B12']
+    perfix_test_data = ['B17']
+
+    # 1 ##### Train Model #####
+    #
+
+
+    # 2 ##### Test Model #####
+
+    mode = 2      # 1 = train , 2 = test
+
+    if mode == 1 :
+        train(model_path, prefix_train_data, window, stride)
+    elif mode == 2 :
+        test(model_path,perfix_test_data,window, stride)
 
