@@ -70,30 +70,24 @@ def load_data(files, group, window, stride):
 
 
 
-def train_model(X_train, y_train, model_path, window):
+def train_model(X_train, y_train, model_path, window,epochs):
 
-    verbose, epochs, batch_size = 1, 3, 128
+    verbose, epochs, batch_size = 1, epochs, 128
     n_features, n_outputs = X_train.shape[2], y_train.shape[1]
 
-    print("AAAAA")
 
     n_steps, n_length = 1, window
     X_train = X_train.reshape((X_train.shape[0], n_steps, n_length, n_features))
 
-    print("BBBBB")
 
     model = Sequential()
-    model.add(TimeDistributed(Conv1D(filters=32, kernel_size=3, activation='relu'),
+    model.add(TimeDistributed(Conv1D(filters=32, kernel_size=11, activation='relu', padding="same"),
     input_shape=(None,n_length,n_features)))
-    #model.add(TimeDistributed(Conv1D(filters=64, kernel_size=3, activation='relu')))
-    model.add(TimeDistributed(Dropout(0.5)))
-    model.add(TimeDistributed(MaxPooling1D(pool_size=4)))
+    model.add(TimeDistributed(Dropout(0.9)))
+    model.add(TimeDistributed(MaxPooling1D(pool_size=2, padding="same")))
     model.add(TimeDistributed(Flatten()))
     model.add(LSTM(50))
-    model.add(Dropout(0.5))
-    #model.add(Dense(100, activation='relu'))
-    model.add(Dense(n_outputs, activation='sigmoid'))
-        #model.add(Dense(n_outputs, activation='softmax'))
+    model.add(Dense(n_outputs, activation='softmax'))
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
     #model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
     
@@ -131,10 +125,10 @@ def evaluate_model(X_test, y_test, model_path,window):
     return class_labels
 
 
-def train(model_path, prefix_train_data, window, stride):
+def train(model_path, prefix_train_data, window, stride, epochs):
     
     X_train, y_train, _ = load_data(prefix_train_data , 'Train', window, stride)
-    train_model(X_train, y_train, model_path, window)
+    train_model(X_train, y_train, model_path, window,epochs)
 
 def test(model_path,perfix_test_data,window, stride):
     X_test, y_test, y_law = load_data(perfix_test_data , 'Test', window, stride)
@@ -154,23 +148,22 @@ def test(model_path,perfix_test_data,window, stride):
 
 
 if __name__ == "__main__":
-    window = 32
-    stride = 8
+    window = 16
+    stride = 4
 
     model_path = 'model/model_' + str(window) + "_" + str(stride)
     prefix_train_data = ['B11','B12']
-    perfix_test_data = ['B17']
+    
+    perfix_test_data = ['B15']
 
-    # 1 ##### Train Model #####
-    #
+ 
 
-
-    # 2 ##### Test Model #####
+    ###############################
 
     mode = 2      # 1 = train , 2 = test
 
     if mode == 1 :
-        train(model_path, prefix_train_data, window, stride)
+        train(model_path, prefix_train_data, window, stride, 10)
     elif mode == 2 :
         test(model_path,perfix_test_data,window, stride)
 

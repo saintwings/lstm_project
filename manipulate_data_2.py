@@ -64,8 +64,8 @@ def split_sequence(data_X_1, data_X_2, data_y, window, stride):
 
 if __name__ == "__main__":
 
-    window = 32#16#128
-    stride = 8#4#32
+    window = 16#16#128
+    stride = 4#4#32
 
     ### Train ##
     train_data = ["B11", "B12"]
