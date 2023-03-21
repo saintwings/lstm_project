@@ -130,30 +130,57 @@ def train(model_path, prefix_train_data, window, stride, epochs):
     train_model(X_train, y_train, model_path, window,epochs)
 
 def test(model_path,perfix_test_data,window, stride):
-    X_test, y_test, y_law = load_data(perfix_test_data , 'Test_Set', window, stride)
+    #print(len(perfix_test_data))
+    #print(perfix_test_data)
 
+    y_set = list()
+
+    for prefix in perfix_test_data:
+        #print(prefix)
+        X_test, y_test, y_law = load_data([prefix] , 'Test_Set', window, stride)
+
+        
+        y_predic = evaluate_model(X_test, y_test, model_path, window)
+
+        y_law = y_law.reshape(1,-1)
+        list_y_law = y_law[0].tolist()
+        #s = arange(0,len(y_predic),1)
+        y_set.append([y_predic,list_y_law])
+
+    plt.figure(figsize=(12,7))
+    for i in range(len(y_set)):
+        ax = plt.subplot(2,3,i+1)
+        ax.set_title(perfix_test_data[i])
+        ax.plot(y_set[i][0],'r')
+        ax.plot(y_set[i][1],'b')
+        #plt.title.set_text(perfix_test_data[i])
+
+
+    # fig, axs = plt.subplots(2,3,figsize=(12, 7))
     
-    y_predic = evaluate_model(X_test, y_test, model_path, window)
+    # for i in range(len(y_set)):
+    #     if i < 3:
+    #         axs[0,i].plot(y_set[i][0],'r')
+    #         axs[0,i].plot(y_set[i][1],'b')
+    #         axs[0,i].set_title(perfix_test_data[i])
+    #     else:
+    #         axs[1,i-3].plot(y_set[i][0],'r')
+    #         axs[1,i-3].plot(y_set[i][1],'b')
+    #         axs[1,i-3].set_title(perfix_test_data[i])
 
-
-    ## plot ##
-    y_law = y_law.reshape(1,-1)
-    list_y_law = y_law[0].tolist()
-    #s = arange(0,len(y_predic),1)
-
-    plt.plot(y_predic, 'r')
-    plt.plot(list_y_law, 'b')
     plt.show()
 
 
 if __name__ == "__main__":
     window = 16
     stride = 4
+    epochs = 3
 
     model_path = 'model/model_' + str(window) + "_" + str(stride)
+    
     prefix_train_data = ['B11','B12']
     
-    perfix_test_data = ['B17']
+    perfix_test_data = ['B13', 'B14','B15','B16','B17']
 
  
 
@@ -162,7 +189,7 @@ if __name__ == "__main__":
     mode = 2      # 1 = train , 2 = test
 
     if mode == 1 :
-        train(model_path, prefix_train_data, window, stride, 10)
+        train(model_path, prefix_train_data, window, stride, epochs)
     elif mode == 2 :
         test(model_path,perfix_test_data,window, stride)
 
