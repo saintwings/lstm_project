@@ -13,24 +13,21 @@ def generate_data(prefix_path, group, prefix_name, path_X1, path_X2, path_y, win
     dataframe_X2 = read_csv(full_path_X2, header=None)
     dataframe_y = read_csv(full_path_y, header=None)
 
-    # print(dataframe_X1.shape)
-    # print(dataframe_X2.shape)
-    # print(dataframe_y.shape)
-    # print(len(dataframe_X1.values))
-    # print(len(dataframe_X2.values))
-    # print(len(dataframe_y.values))
-    #print(dataframe_X1.values)
+
+
     X_1, X_2, y = split_sequence(dataframe_X1.values, dataframe_X2.values, dataframe_y.values, window, stride)
-    
-    with open(prefix_path + group + prefix_name + '_X_1_w_'+ str(window) +'_s_'+ str(stride) +'.csv', 'w') as f:
+
+    prefix_save_file = "Dataset_Window/"
+
+    with open(prefix_save_file + group + prefix_name + '_X_1_w_'+ str(window) +'_s_'+ str(stride) +'.csv', 'w') as f:
         write = csv.writer(f)
         write.writerows(X_1)
     
-    with open(prefix_path + group + prefix_name + '_X_2_w_'+ str(window) +'_s_'+ str(stride) +'.csv', 'w') as f:
+    with open(prefix_save_file + group + prefix_name + '_X_2_w_'+ str(window) +'_s_'+ str(stride) +'.csv', 'w') as f:
         write = csv.writer(f)
         write.writerows(X_2)
     
-    with open(prefix_path + group + prefix_name + '_y_w_'+ str(window) +'_s_'+ str(stride) +'.csv', 'w') as f:
+    with open(prefix_save_file + group + prefix_name + '_y_w_'+ str(window) +'_s_'+ str(stride) +'.csv', 'w') as f:
         write = csv.writer(f,delimiter="\n")
         write.writerow(y)
 
@@ -70,8 +67,8 @@ if __name__ == "__main__":
     ### Train ##
     train_data = ["B11", "B12"]
     for train in train_data:
-        generate_data("data/", 
-                      "Train/", 
+        generate_data("Dataset_Augmentation/", 
+                      "Train_Set/", 
                       train,
                       "_XTrain_Feature1.csv",
                       "_XTrain_Feature2.csv",
@@ -82,8 +79,8 @@ if __name__ == "__main__":
     ### Test ###
     test_data = ["B13", "B14", "B15", "B16", "B17"]
     for test in test_data :
-        generate_data("data/", 
-                    "Test/", 
+        generate_data("Dataset_Augmentation/", 
+                    "Test_Set/", 
                     test,
                     "XTest_Mean_H.csv",
                     "XTest_Mean_V.csv",

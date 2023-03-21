@@ -36,9 +36,9 @@ def load_data(files, group, window, stride):
     X = array([]).reshape(0,window,2)
     y = array([]).reshape(0,1)
     for file in files:
-        file_feature_X1_name = 'data/' + group + '/' + file + '_X_1_w_' + str(window) + '_s_' + str(stride) + '.csv'  
-        file_feature_X2_name = 'data/' + group + '/' + file + '_X_2_w_' + str(window) + '_s_' + str(stride) + '.csv'  
-        file_label_name = 'data/' + group + '/' + file + '_y_w_' + str(window) + '_s_' + str(stride) + '.csv'  
+        file_feature_X1_name = 'Dataset_Window/' + group + '/' + file + '_X_1_w_' + str(window) + '_s_' + str(stride) + '.csv'  
+        file_feature_X2_name = 'Dataset_Window/' + group + '/' + file + '_X_2_w_' + str(window) + '_s_' + str(stride) + '.csv'  
+        file_label_name = 'Dataset_Window/' + group + '/' + file + '_y_w_' + str(window) + '_s_' + str(stride) + '.csv'  
         
         X_loaded = list()
 
@@ -59,7 +59,6 @@ def load_data(files, group, window, stride):
     y_encoded = to_categorical(y)
     #print(y_encoded)
     print("y_encoded ",y_encoded.shape)
-    print("111111111sss")
     return X, y_encoded, y
 
     #exit()
@@ -127,11 +126,11 @@ def evaluate_model(X_test, y_test, model_path,window):
 
 def train(model_path, prefix_train_data, window, stride, epochs):
     
-    X_train, y_train, _ = load_data(prefix_train_data , 'Train', window, stride)
+    X_train, y_train, _ = load_data(prefix_train_data , 'Train_Set', window, stride)
     train_model(X_train, y_train, model_path, window,epochs)
 
 def test(model_path,perfix_test_data,window, stride):
-    X_test, y_test, y_law = load_data(perfix_test_data , 'Test', window, stride)
+    X_test, y_test, y_law = load_data(perfix_test_data , 'Test_Set', window, stride)
 
     
     y_predic = evaluate_model(X_test, y_test, model_path, window)
@@ -154,7 +153,7 @@ if __name__ == "__main__":
     model_path = 'model/model_' + str(window) + "_" + str(stride)
     prefix_train_data = ['B11','B12']
     
-    perfix_test_data = ['B15']
+    perfix_test_data = ['B17']
 
  
 

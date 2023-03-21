@@ -1,4 +1,3 @@
-/gen_data
-/DataSetForPython
-/HARDataset
-/data
+/Dataset_Window/Train_Set/*
+/Dataset_Window/Test_Set/*
+/Dataset_Augmentation
