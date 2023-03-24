@@ -21,6 +21,8 @@ from keras.layers.convolutional import Conv1D
 from keras.layers.convolutional import MaxPooling1D
 from keras.utils import to_categorical
 
+from plot import LearningPlotCallback
+
 import time
 
 import matplotlib.pyplot as plt
@@ -93,8 +95,9 @@ def train_model(X_train, y_train, model_path, window,epochs):
     model.summary()
     # fit network
     print("Training...")
-    model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, verbose=verbose)
-
+    #history = model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, verbose=verbose)
+    history = model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, verbose=verbose, callbacks=[LearningPlotCallback()])
+    print(history.history.keys())
     model.save(model_path)
 
 
@@ -155,25 +158,12 @@ def test(model_path,perfix_test_data,window, stride):
         ax.plot(y_set[i][1],'b')
         #plt.title.set_text(perfix_test_data[i])
 
-
-    # fig, axs = plt.subplots(2,3,figsize=(12, 7))
-    
-    # for i in range(len(y_set)):
-    #     if i < 3:
-    #         axs[0,i].plot(y_set[i][0],'r')
-    #         axs[0,i].plot(y_set[i][1],'b')
-    #         axs[0,i].set_title(perfix_test_data[i])
-    #     else:
-    #         axs[1,i-3].plot(y_set[i][0],'r')
-    #         axs[1,i-3].plot(y_set[i][1],'b')
-    #         axs[1,i-3].set_title(perfix_test_data[i])
-
     plt.show()
 
 
 if __name__ == "__main__":
-    window = 16
-    stride = 4
+    window = 32
+    stride = 8
     epochs = 3
 
     model_path = 'model/model_' + str(window) + "_" + str(stride)
@@ -186,7 +176,7 @@ if __name__ == "__main__":
 
     ###############################
 
-    mode = 2      # 1 = train , 2 = test
+    mode = 1      # 1 = train , 2 = test
 
     if mode == 1 :
         train(model_path, prefix_train_data, window, stride, epochs)

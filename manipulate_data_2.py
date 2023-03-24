@@ -8,13 +8,17 @@ def generate_data(prefix_path, group, prefix_name, path_X1, path_X2, path_y, win
     full_path_X2 = prefix_path + group + prefix_name + path_X2
     full_path_y = prefix_path + group + prefix_name + path_y
 
+    print("Load : ", full_path_X1)
+    print("Load : ", full_path_X2)
+    print("Load : ", full_path_y)
+
 
     dataframe_X1 = read_csv(full_path_X1, header=None)
     dataframe_X2 = read_csv(full_path_X2, header=None)
     dataframe_y = read_csv(full_path_y, header=None)
 
 
-
+    print("Spliting...")
     X_1, X_2, y = split_sequence(dataframe_X1.values, dataframe_X2.values, dataframe_y.values, window, stride)
 
     prefix_save_file = "Dataset_Window/"
@@ -30,6 +34,7 @@ def generate_data(prefix_path, group, prefix_name, path_X1, path_X2, path_y, win
     with open(prefix_save_file + group + prefix_name + '_y_w_'+ str(window) +'_s_'+ str(stride) +'.csv', 'w') as f:
         write = csv.writer(f,delimiter="\n")
         write.writerow(y)
+    print("Saved +++")
 
 def split_sequence(data_X_1, data_X_2, data_y, window, stride):
     X_1,X_2, y = list(), list(),list()
@@ -61,8 +66,8 @@ def split_sequence(data_X_1, data_X_2, data_y, window, stride):
 
 if __name__ == "__main__":
 
-    window = 16#16#128
-    stride = 4#4#32
+    window = 32#16#128
+    stride = 8#4#32
 
     ### Train ##
     train_data = ["B11", "B12"]
@@ -87,5 +92,7 @@ if __name__ == "__main__":
                     "YTest_Mean.csv",
                     window,
                     stride)
+    
+    print("Finished ##############################")
     
     
