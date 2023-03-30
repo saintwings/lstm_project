@@ -1,6 +1,7 @@
 /Dataset_Window/Train_Set/*
 /Dataset_Window/Test_Set/*
 /Dataset_Augmentation
+/Raw_dataset
 
 !/Dataset_Window/Train_Set/train_set.txt
 !/Dataset_Window/Test_Set/test_set.txt

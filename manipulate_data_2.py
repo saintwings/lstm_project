@@ -66,32 +66,56 @@ def split_sequence(data_X_1, data_X_2, data_y, window, stride):
 
 if __name__ == "__main__":
 
-    window = 32#16#128
-    stride = 8#4#32
+    window = 128#16#128
+    stride = 128#4#32
 
     ### Train ##
     train_data = ["B11", "B12"]
     for train in train_data:
-        generate_data("Dataset_Augmentation/", 
+        generate_data("Raw_dataset/", 
                       "Train_Set/", 
                       train,
-                      "_XTrain_Feature1.csv",
-                      "_XTrain_Feature2.csv",
-                      "_YTrain.csv",
+                      "_XTrain_Full_Feature1.csv",
+                      "_XTrain_Full_Feature2.csv",
+                      "_YTrain_Full.csv",
                       window,
                       stride)
     
     ### Test ###
     test_data = ["B13", "B14", "B15", "B16", "B17"]
     for test in test_data :
-        generate_data("Dataset_Augmentation/", 
+        generate_data("Raw_dataset/", 
                     "Test_Set/", 
                     test,
-                    "XTest_Mean_H.csv",
-                    "XTest_Mean_V.csv",
-                    "YTest_Mean.csv",
+                    "_XTest_Full_Feature1.csv",
+                    "_XTest_Full_Feature2.csv",
+                    "_YTest_Full.csv",
                     window,
                     stride)
+
+    # ### Train ##
+    # train_data = ["B11", "B12"]
+    # for train in train_data:
+    #     generate_data("Dataset_Augmentation/", 
+    #                   "Train_Set/", 
+    #                   train,
+    #                   "_XTrain_Feature1.csv",
+    #                   "_XTrain_Feature2.csv",
+    #                   "_YTrain.csv",
+    #                   window,
+    #                   stride)
+    
+    # ### Test ###
+    # test_data = ["B13", "B14", "B15", "B16", "B17"]
+    # for test in test_data :
+    #     generate_data("Dataset_Augmentation/", 
+    #                 "Test_Set/", 
+    #                 test,
+    #                 "XTest_Mean_H.csv",
+    #                 "XTest_Mean_V.csv",
+    #                 "YTest_Mean.csv",
+    #                 window,
+    #                 stride)
     
     print("Finished ##############################")
     
